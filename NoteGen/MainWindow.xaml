@@ -7,6 +7,13 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        
+        <Menu x:Name="menu" Height="22" VerticalAlignment="Top">
+            <MenuItem Header="File" Height="21">
+                <MenuItem Header="Open" HorizontalAlignment="Left" Width="136" Height="21" Click="FileOpenHandler"/>
+            </MenuItem>
+        </Menu>
+        <Button x:Name="playButton" Content="Play" HorizontalAlignment="Right" Margin="0,33,451,0" VerticalAlignment="Top" Width="41" Click="playButton_Click"/>
+        <Label x:Name="fileInfo" Content="" Margin="0,27,78,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="340"/>
+
     </Grid>
 </Window>
