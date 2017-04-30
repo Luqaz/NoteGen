@@ -3,19 +3,37 @@
 //using CSCore.SoundOut;
 using NAudio;
 using NAudio.Wave;
+using NAudio.Flac;
+using NAudio.Vorbis;
+using NAudio.WindowsMediaFormat;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows;
 
 namespace SoundProcessor
 {
     public class SoundPlayer
     {
-        private AudioFileReader audioFileReader;
+        private WaveStream fileStream;
         private IWavePlayer waveOutDevice;
-        private static SoundPlayer player;
+
+        public event EventHandler<SampleProcessor.MaxSampleEventArgs> VolumeCalculated;
+
+        protected virtual void OnMaximumCalculated(SampleProcessor.MaxSampleEventArgs e)
+        {
+            VolumeCalculated?.Invoke(this, e);
+        }
+
+        public event EventHandler<SampleProcessor.FftEventArgs> FftCalculated;
+
+        protected virtual void OnFftCalculated(SampleProcessor.FftEventArgs e)
+        {
+            FftCalculated?.Invoke(this, e);
+        }
+
         public string Status
         {
             get
@@ -26,88 +44,92 @@ namespace SoundProcessor
 
         public string Info;
 
-
-        private SoundPlayer(string fileName)
+        public void Load(string fileName)
         {
-            waveOutDevice = new WaveOut();
-            getTag(fileName);
-            audioFileReader = new AudioFileReader(fileName);
-            var Tag = Id3v2Tag.ReadTag(audioFileReader);
-            //Info = GetInfo(Tag.RawData);
+            Stop();
+            CloseFile();
+            EnsureDeviceCreated();
+            OpenFile(fileName);
         }
 
-        private void getTag(string fileName)
+        private void OpenFile(string fileName)
         {
-            Info = "";
-            if (fileName.EndsWith(".mp3"))
+            try
             {
-                var reader = new Mp3FileReader(fileName);
-                Info = GetInfo(reader.Id3v1Tag);
+                var audioFileReader = new AudioFileReader(fileName);
+                fileStream = audioFileReader;
+                var sampleProcessor = new SampleProcessor(audioFileReader);
+                sampleProcessor.NotificationCount = audioFileReader.WaveFormat.SampleRate / 100;
+                sampleProcessor.MaximumCalculated += (s, a) => OnMaximumCalculated(a);
+                sampleProcessor.FftCalculated += (s, a) => OnFftCalculated(a);
+                waveOutDevice.Init(sampleProcessor);
             }
-            else
+            catch (Exception e)
             {
-                var reader = new MediaFoundationReader(fileName);
-                var tag = Id3v2Tag.ReadTag(reader);
+                MessageBox.Show(e.Message, "Problem opening file");
+                CloseFile();
             }
         }
 
-        public static SoundPlayer getInstance(string fileName)
+        private void EnsureDeviceCreated()
         {
-            if (player == null)
+            if (waveOutDevice == null)
             {
-                player = new SoundPlayer(fileName);
+                CreateDevice();
             }
-            else
+        }
+
+        private void CreateDevice()
+        {
+            waveOutDevice = new WaveOut { DesiredLatency = 200 };
+        }
+
+        private void CloseFile()
+        {
+            if (fileStream != null)
             {
-                player.audioFileReader = new AudioFileReader(fileName);
-                player.getTag(fileName);
-                //player.Info = player.GetInfo(Tag.RawData);
+                fileStream.Dispose();
+                fileStream = null;
             }
-            return player;
         }
 
         public void Play()
         {
-            waveOutDevice.Init(audioFileReader);
-            waveOutDevice.Play();
+            
+            if (waveOutDevice != null && fileStream != null && waveOutDevice.PlaybackState != PlaybackState.Playing)
+            {
+                waveOutDevice.Play();
+            }
         }
 
         public void Stop()
         {
-            waveOutDevice.Stop();
+            if (waveOutDevice != null)
+            {
+                waveOutDevice.Stop();
+            }
+            if (fileStream != null)
+            {
+                fileStream.Position = 0;
+            }
         }
 
         public Stream getRawAudioDataStream()
         {
             Stream rawAudio = new MemoryStream();
-            audioFileReader.CopyTo(rawAudio);
+            fileStream.CopyTo(rawAudio);
             return rawAudio;
         }
 
-        public string GetInfo(byte[] b)
+        public void Dispose()
         {
-            string sTitle = "unknown";
-            string sSinger = "unknown";
-            string sAlbum = "unknown";
-            string sYear = "unknown";
-            string sComm = "unknown";
-
-            var isSet = false;
-            var sFlag = Encoding.Default.GetString(b, 0, 3);
-            if (sFlag.CompareTo("TAG") == 0)
+            Stop();
+            CloseFile();
+            if (waveOutDevice != null)
             {
-                isSet = true;
+                waveOutDevice.Dispose();
+                waveOutDevice = null;
             }
-            if (isSet)
-            {
-                sTitle = Encoding.Default.GetString(b, 3, 30);
-                sSinger = Encoding.Default.GetString(b, 33, 30);
-                sAlbum = Encoding.Default.GetString(b, 63, 30);
-                sYear = Encoding.Default.GetString(b, 93, 4);
-                sComm = Encoding.Default.GetString(b, 97, 30);
-            }
-
-            return String.Format("{0} - {1}", sSinger.Trim(), sTitle.Trim());
         }
     }
 }

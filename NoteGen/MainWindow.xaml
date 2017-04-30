@@ -14,6 +14,9 @@
         </Menu>
         <Button x:Name="playButton" Content="Play" HorizontalAlignment="Right" Margin="0,33,451,0" VerticalAlignment="Top" Width="41" Click="playButton_Click"/>
         <Label x:Name="fileInfo" Content="" Margin="0,27,78,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="340"/>
+        <Label x:Name="xValue" Content="" HorizontalAlignment="Left" Margin="25,274,0,0" VerticalAlignment="Top" Width="52"/>
+        <Label x:Name="yValue" Content="" HorizontalAlignment="Left" Margin="99,274,0,0" VerticalAlignment="Top" Width="52"/>
+        <ContentPresenter x:Name="presenter" Content="" Margin="0,58,0,50"/>
 
     </Grid>
 </Window>

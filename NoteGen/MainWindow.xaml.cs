@@ -17,6 +17,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.ComponentModel;
+using System.ComponentModel.Composition;
 
 namespace NoteGen
 {
@@ -25,13 +26,46 @@ namespace NoteGen
     /// </summary>
     public partial class MainWindow : Window
     {
-        private List<byte> fileBytes = new List<byte>();
         private SoundPlayer player;
         private string fileName { get; set; }
+        private List<IVisualizationPlugin> visualizations;
+        private IVisualizationPlugin selectedVisualization;
 
         public MainWindow()
         {
             InitializeComponent();
+            player = new SoundPlayer();
+            player.VolumeCalculated += audioGraph_MaximumCalculated;
+            player.FftCalculated += audioGraph_FFTCalculated;
+
+            this.visualizations = new List<IVisualizationPlugin> { new PolylineWaveFormVisualization() };
+            this.selectedVisualization = this.visualizations.FirstOrDefault();
+            presenter.Content = Visualization;
+        }
+
+        public IList<IVisualizationPlugin> Visualizations { get { return this.visualizations; } }
+
+        public object Visualization
+        {
+            get
+            {
+                return this.selectedVisualization.Content;
+            }
+        }
+
+        public IVisualizationPlugin SelectedVisualization
+        {
+            get
+            {
+                return this.selectedVisualization;
+            }
+            set
+            {
+                if (this.selectedVisualization != value)
+                {
+                    this.selectedVisualization = value;
+                }
+            }
         }
 
         private void FileOpenHandler(object sender, RoutedEventArgs e)
@@ -41,32 +75,7 @@ namespace NoteGen
             if(fileDialog.ShowDialog().Value)
             {
                 fileName = fileDialog.FileName;
-                player = SoundPlayer.getInstance(fileName);
-                try
-                {
-                    using (var fileStream = fileDialog.OpenFile())
-                    {
-                        if(String.IsNullOrWhiteSpace(player.Info))
-                        {
-                            fileInfo.Content = fileDialog.SafeFileName;
-                        }
-                        else
-                        {
-                            fileInfo.Content = player.Info;
-                        }
-                        int fileByte = fileStream.ReadByte();
-                        while (fileByte != -1)
-                        {
-                            fileBytes.Add((byte)fileByte);
-                            fileByte = fileStream.ReadByte();
-                        }
-                    }
-                }
-                catch(Exception ex)
-                {
-                    MessageBox.Show(ex.Message + "\n\n\n" + ex.StackTrace);
-                }
-                
+                player.Load(fileName);                
             }
         }
 
@@ -91,6 +100,18 @@ namespace NoteGen
         {
             base.OnClosing(e);
             player.Stop();
+        }
+
+        void audioGraph_MaximumCalculated(object sender, SampleProcessor.MaxSampleEventArgs e)
+        {
+            this.xValue.Content = e.MaxSample;
+            this.yValue.Content = e.MinSample;
+            this.SelectedVisualization.OnMaxCalculated(e.MinSample, e.MaxSample);
+        }
+
+        void audioGraph_FFTCalculated(object sender, SampleProcessor.FftEventArgs e)
+        {
+
         }
     }
 }
