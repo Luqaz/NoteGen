@@ -71,7 +71,7 @@ namespace NoteGen
         private void FileOpenHandler(object sender, RoutedEventArgs e)
         {
             var fileDialog = new OpenFileDialog();
-            fileDialog.Filter = "MP3 File (*.mp3)|*.mp3|FLAC file (*.flac)|*.flac|ALAC file (*.m4a)|*.m4a";
+            fileDialog.Filter = "MP3 File (*.mp3)|*.mp3|FLAC file (*.flac)|*.flac|ALAC file (*.m4a)|*.m4a|OGG file (*.ogg)|*.ogg";
             if(fileDialog.ShowDialog().Value)
             {
                 fileName = fileDialog.FileName;
@@ -104,14 +104,20 @@ namespace NoteGen
 
         void audioGraph_MaximumCalculated(object sender, SampleProcessor.MaxSampleEventArgs e)
         {
-            this.xValue.Content = e.MaxSample;
-            this.yValue.Content = e.MinSample;
+            
             this.SelectedVisualization.OnMaxCalculated(e.MinSample, e.MaxSample);
         }
 
         void audioGraph_FFTCalculated(object sender, SampleProcessor.FftEventArgs e)
         {
-
+            var gainer = new MFCCGainer(43, e.Result.Count, e.SampleRate);
+            var coeffs = gainer.getCoefficents(e.Result);
+            String resultString = "";
+            foreach(var coeff in coeffs)
+            {
+                resultString += Math.Round(coeff, 3) + " \n";
+            }
+            mfccCoeffs.Text = resultString;
         }
     }
 }

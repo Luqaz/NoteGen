@@ -9,18 +9,20 @@ namespace SoundProcessor
     public class MFCCGainer
     {
         private int minFreq = 16;
-        private int maxFreq = 20000;
+        private int maxFreq;
         private List<double> freqs = new List<double>();
 
         public MFCCGainer(int numberOfFilters, int nFFT, int samplerate)
         {
+            maxFreq = samplerate / 2;
             for (int i = 0; i < numberOfFilters; i++)
             {
                 var maxMel = Freq2Mel(maxFreq);
                 var minMel = Freq2Mel(minFreq);
-                var avgDiff = (maxFreq - minFreq) / numberOfFilters;
+                var avgDiff = (maxMel - minMel) / numberOfFilters;
                 var freqResult = Mel2Freq(i * avgDiff + minMel);
-                freqs.Add(Math.Floor((nFFT + 1) * freqResult / samplerate));
+                //freqs.Add(Math.Floor((nFFT + 1) * freqResult / samplerate));
+                freqs.Add(freqResult);
             }
         }
 
@@ -59,13 +61,13 @@ namespace SoundProcessor
                 var sum = 0d;
                 foreach (var sample in signal)
                 {
-                    sum += (Math.Pow(sample.Amplitude, 2)/signal.Count) * getPower(i, sample.Frequency);
+                    sum += sample.Amplitude * getPower(i, sample.Frequency);
                 }
                 filteredPowers.Add(Math.Log(sum));
             }
 
             DCT(filteredPowers);
-
+            filteredPowers.RemoveAt(0);
             return filteredPowers;
         }
 

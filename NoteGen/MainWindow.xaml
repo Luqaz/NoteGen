@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NoteGen"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
+        Title="MainWindow" Height="941.5" Width="525">
+    <Grid Margin="0,0,0,-21">
         <Menu x:Name="menu" Height="22" VerticalAlignment="Top">
             <MenuItem Header="File" Height="21">
                 <MenuItem Header="Open" HorizontalAlignment="Left" Width="136" Height="21" Click="FileOpenHandler"/>
@@ -14,9 +14,9 @@
         </Menu>
         <Button x:Name="playButton" Content="Play" HorizontalAlignment="Right" Margin="0,33,451,0" VerticalAlignment="Top" Width="41" Click="playButton_Click"/>
         <Label x:Name="fileInfo" Content="" Margin="0,27,78,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="340"/>
-        <Label x:Name="xValue" Content="" HorizontalAlignment="Left" Margin="25,274,0,0" VerticalAlignment="Top" Width="52"/>
-        <Label x:Name="yValue" Content="" HorizontalAlignment="Left" Margin="99,274,0,0" VerticalAlignment="Top" Width="52"/>
-        <ContentPresenter x:Name="presenter" Content="" Margin="0,58,0,50"/>
+
+        <ContentPresenter x:Name="presenter" Content="" Margin="0,58,0,708"/>
+        <TextBlock x:Name="mfccCoeffs" HorizontalAlignment="Left" Margin="25,257,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="622" Width="158"/>
 
     </Grid>
 </Window>

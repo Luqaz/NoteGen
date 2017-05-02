@@ -21,7 +21,7 @@ namespace SoundProcessor
         public event EventHandler<FftEventArgs> FftCalculated;
         public bool PerformFFT { get; set; }
         private readonly Complex[] fftBuffer;
-        private readonly FftEventArgs fftArgs;
+        private FftEventArgs fftArgs;
         private int fftPos;
         private readonly int fftLength;
         private int m;
@@ -39,7 +39,7 @@ namespace SoundProcessor
             this.m = (int)Math.Log(fftLength, 2.0);
             this.fftLength = fftLength;
             this.fftBuffer = new Complex[fftLength];
-            this.fftArgs = new FftEventArgs(fftBuffer);
+            
 
             this.source = source;
         }
@@ -73,6 +73,7 @@ namespace SoundProcessor
                 fftPos = 0;
                 // 1024 = 2^10
                 FastFourierTransform.FFT(true, m, fftBuffer);
+                fftArgs = new FftEventArgs(fftBuffer, NotificationCount*100);
                 FftCalculated(this, fftArgs);
             }
 
@@ -92,9 +93,20 @@ namespace SoundProcessor
 
             for (int n = 0; n < samplesRead; n += channels)
             {
+
                 Add(buffer[n + offset]);
             }
+
+            //for(double x = 0; x <= 1; x+=1.0/44100)
+            //{
+            //    Add((float)sin600hz(x));    
+            //}
             return samplesRead;
+        }
+
+        private double sin600hz(double x)
+        {
+            return Math.Sin(2 * Math.PI * 600 * x);
         }
 
         public class MaxSampleEventArgs : EventArgs
@@ -111,12 +123,21 @@ namespace SoundProcessor
 
         public class FftEventArgs : EventArgs
         {
-            [DebuggerStepThrough]
-            public FftEventArgs(Complex[] result)
+            //[DebuggerStepThrough]
+            public FftEventArgs(Complex[] result, int sampleRate)
             {
-                this.Result = result;
+                this.Result = new List<SignalSample>();
+                this.SampleRate = sampleRate;
+                int numUniquePts = (int)System.Math.Ceiling((result.Length + 1) / 2.0);
+                for (int i = 0; i < numUniquePts; i++)
+                {
+                    var amp = (result[i].X * result[i].X + result[i].Y * result[i].Y);
+                    var freq = i * (double)sampleRate / result.Length;
+                    Result.Add(new SignalSample(freq, amp));
+                }
             }
-            public Complex[] Result { get; private set; }
+            public List<SignalSample> Result { get; private set; }
+            public int SampleRate { get; private set; }
         }
     }
 }
