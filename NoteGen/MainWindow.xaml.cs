@@ -30,6 +30,7 @@ namespace NoteGen
         private string fileName { get; set; }
         private List<IVisualizationPlugin> visualizations;
         private IVisualizationPlugin selectedVisualization;
+        private List<List<double>> buffer = new List<List<double>>();
 
         public MainWindow()
         {
@@ -110,14 +111,14 @@ namespace NoteGen
 
         void audioGraph_FFTCalculated(object sender, SampleProcessor.FftEventArgs e)
         {
-            var gainer = new MFCCGainer(43, e.Result.Count, e.SampleRate);
-            var coeffs = gainer.getCoefficents(e.Result);
-            String resultString = "";
-            foreach(var coeff in coeffs)
+            var gainer = new MFCCGainer(26, e.Result.Count, e.SampleRate);
+            buffer.Add(gainer.getCoefficents(e.Result));
+            
+            if(buffer.Count == 10)
             {
-                resultString += Math.Round(coeff, 3) + " \n";
+                //to neuro network
+                buffer.Clear();
             }
-            mfccCoeffs.Text = resultString;
         }
     }
 }

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoteGen", "NoteGen\NoteGen.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundProcessor", "SoundProcessor\SoundProcessor.csproj", "{949D6CFE-E86E-494E-8422-9CA8A6260A97}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NeuroNetwork", "NeuroNetwork\NeuroNetwork.csproj", "{02624BD6-6CC9-469F-B7EB-56623B511151}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{949D6CFE-E86E-494E-8422-9CA8A6260A97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{949D6CFE-E86E-494E-8422-9CA8A6260A97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{949D6CFE-E86E-494E-8422-9CA8A6260A97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02624BD6-6CC9-469F-B7EB-56623B511151}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02624BD6-6CC9-469F-B7EB-56623B511151}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02624BD6-6CC9-469F-B7EB-56623B511151}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02624BD6-6CC9-469F-B7EB-56623B511151}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
