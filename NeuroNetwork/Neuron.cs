@@ -21,7 +21,7 @@ namespace NeuroNetwork
             Inputs = inputVals;
             foreach(var val in inputVals)
             {
-                Weights.Add(rand.NextDouble()*10 - 5);
+                Weights.Add(rand.NextDouble());
                 PreviousDeltas.Add(0);
             }
             this.alpha = alpha;
@@ -51,7 +51,7 @@ namespace NeuroNetwork
 
         public double Derivative(double x)
         {
-            return alpha * activationFunc(x) * (1 - activationFunc(x));
+            return alpha * x * (1 - x);
         }
 
         public void CorrectWeigts(List<double> diffWeights)
