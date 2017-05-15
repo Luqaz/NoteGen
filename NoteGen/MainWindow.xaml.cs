@@ -1,6 +1,7 @@
 ﻿using CSCore.Codecs;
 using Microsoft.Win32;
 using SoundProcessor;
+using NeuroNetwork;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -116,7 +117,10 @@ namespace NoteGen
             
             if(buffer.Count == 10)
             {
-                //to neuro network
+                var network = new NeuroNetwork.NeuroNetwork(buffer, 7);
+                var instruments = network.GetResults();
+                var classifier = new NoteClassifier();
+                var notes = classifier.getNotes(e.Result, instruments.Count((n) => n >= 0.6));
                 buffer.Clear();
             }
         }

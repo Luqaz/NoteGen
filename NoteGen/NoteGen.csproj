@@ -112,6 +112,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\NeuroNetwork\NeuroNetwork.csproj">
+      <Project>{02624bd6-6cc9-469f-b7eb-56623b511151}</Project>
+      <Name>NeuroNetwork</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SoundProcessor\SoundProcessor.csproj">
       <Project>{949d6cfe-e86e-494e-8422-9ca8a6260a97}</Project>
       <Name>SoundProcessor</Name>
