@@ -68,6 +68,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MFCCGainer.cs" />
+    <Compile Include="Note.cs" />
+    <Compile Include="NoteClassifier.cs" />
     <Compile Include="SampleProcessor.cs" />
     <Compile Include="SignalSample.cs" />
     <Compile Include="SoundPlayer.cs" />
