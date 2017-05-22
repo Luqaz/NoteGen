@@ -13,29 +13,34 @@ namespace NeuroNetwork
         public List<double> PreviousDeltas { get; private set; }
         private double alpha;
 
-        public Neuron(List<double> inputVals, double alpha = 1)
+        public Neuron(double alpha = 1)
         {
-            Random rand = new Random();
+            
             Weights = new List<double>();
             PreviousDeltas = new List<double>();
-            Inputs = inputVals;
-            foreach(var val in inputVals)
-            {
-                Weights.Add(rand.NextDouble());
-                PreviousDeltas.Add(0);
-            }
+            
             this.alpha = alpha;
         }
 
-        public Neuron(List<double> inputVals, List<double> weigtsVals, double alpha = 1)
+        public Neuron(List<double> weigtsVals, double alpha = 1)
         {
-            Inputs = inputVals;
             Weights = weigtsVals;
             this.alpha = alpha;
         }
 
-        public double CountOutput()
+        public double CountOutput(List<double> inputVals)
         {
+            Inputs = inputVals;
+            Random rand = new Random();
+            if (Weights.Count == 0)
+            {
+                foreach (var val in inputVals)
+                {
+                    Weights.Add(rand.NextDouble());
+                    PreviousDeltas.Add(0);
+                }
+            }
+
             double summary = 0;
             for(int i = 0; i < Inputs.Count; i++)
             {

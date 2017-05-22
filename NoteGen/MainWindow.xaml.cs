@@ -32,6 +32,7 @@ namespace NoteGen
         private List<IVisualizationPlugin> visualizations;
         private IVisualizationPlugin selectedVisualization;
         private List<List<double>> buffer = new List<List<double>>();
+        NeuroNetwork.NeuroNetwork network;
 
         public MainWindow()
         {
@@ -117,8 +118,8 @@ namespace NoteGen
             
             if(buffer.Count == 10)
             {
-                var network = new NeuroNetwork.NeuroNetwork(buffer, 7);
-                var instruments = network.GetResults();
+                //var network = new NeuroNetwork.NeuroNetwork(7);
+                var instruments = network.GetResults(buffer);
                 var classifier = new NoteClassifier();
                 var notes = classifier.getNotes(e.Result, instruments.Count((n) => n >= 0.6));
                 buffer.Clear();

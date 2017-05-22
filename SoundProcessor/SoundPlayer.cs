@@ -17,7 +17,7 @@ namespace SoundProcessor
 {
     public class SoundPlayer
     {
-        private WaveStream fileStream;
+        public WaveStream fileStream;
         private IWavePlayer waveOutDevice;
 
         public event EventHandler<SampleProcessor.MaxSampleEventArgs> VolumeCalculated;

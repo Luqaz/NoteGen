@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{576BD958-B2A3-43C5-A4C2-EBB6C08A0FEA}</ProjectGuid>
+    <ProjectGuid>{48950CBC-3A69-4AEC-BBAD-B02B78F57A38}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NoteGenEducation</RootNamespace>
-    <AssemblyName>NoteGenEducation</AssemblyName>
+    <RootNamespace>NoteGenTest</RootNamespace>
+    <AssemblyName>NoteGenTest</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -33,7 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NAudio, Version=1.8.0.0, Culture=neutral, PublicKeyToken=null" />
+    <Reference Include="NAudio">
+      <HintPath>..\NoteGen\bin\Debug\NAudio.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -52,11 +54,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NeuroNetwork\NeuroNetwork.csproj">
-      <Project>{02624bd6-6cc9-469f-b7eb-56623b511151}</Project>
+      <Project>{02624BD6-6CC9-469F-B7EB-56623B511151}</Project>
       <Name>NeuroNetwork</Name>
     </ProjectReference>
+    <ProjectReference Include="..\NoteGen\NoteGen.csproj">
+      <Project>{b35798b7-9ec1-4394-a6a0-1783fbb7b29e}</Project>
+      <Name>NoteGen</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SoundProcessor\SoundProcessor.csproj">
-      <Project>{949d6cfe-e86e-494e-8422-9ca8a6260a97}</Project>
+      <Project>{949D6CFE-E86E-494E-8422-9CA8A6260A97}</Project>
       <Name>SoundProcessor</Name>
     </ProjectReference>
   </ItemGroup>
