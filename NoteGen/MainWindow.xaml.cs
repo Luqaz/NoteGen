@@ -32,11 +32,13 @@ namespace NoteGen
         private List<IVisualizationPlugin> visualizations;
         private IVisualizationPlugin selectedVisualization;
         private List<List<double>> buffer = new List<List<double>>();
-        NeuroNetwork.NeuroNetwork network;
+        private List<String> instruments = new List<string> { "Acoustic Guitar", "Electric Guitar", "Drums", "Violin", "Piano", "Flute" };
+        private NeuroNetwork.NeuroNetwork network; 
 
         public MainWindow()
         {
             InitializeComponent();
+            network = new NeuroNetwork.NeuroNetwork(instruments.Count, "weights");
             player = new SoundPlayer();
             player.VolumeCalculated += audioGraph_MaximumCalculated;
             player.FftCalculated += audioGraph_FFTCalculated;
@@ -110,18 +112,16 @@ namespace NoteGen
             
             this.SelectedVisualization.OnMaxCalculated(e.MinSample, e.MaxSample);
         }
-
+        NoteClassifier classifier = new NoteClassifier();
         void audioGraph_FFTCalculated(object sender, SampleProcessor.FftEventArgs e)
         {
             var gainer = new MFCCGainer(26, e.Result.Count, e.SampleRate);
             buffer.Add(gainer.getCoefficents(e.Result));
             
-            if(buffer.Count == 10)
+            if(buffer.Count == 15)
             {
-                //var network = new NeuroNetwork.NeuroNetwork(7);
                 var instruments = network.GetResults(buffer);
-                var classifier = new NoteClassifier();
-                var notes = classifier.getNotes(e.Result, instruments.Count((n) => n >= 0.6));
+                var notes = classifier.getNotes(e.Result);
                 buffer.Clear();
             }
         }

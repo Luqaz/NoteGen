@@ -62,11 +62,11 @@ namespace SoundProcessor
             return result;
         }
 
-        public List<String> getNotes(List<SignalSample> signal, int numberOfInstruments)
+        public List<String> getNotes(List<SignalSample> signal)
         {
             var result = new List<String>();
             var maximums = getLocalMaximums(signal);
-            for(int i = 0; i < numberOfInstruments; i++)
+            for(int i = 0; i < maximums.Count; i++)
             {
                 var freq = maximums[i].Frequency;
                 for (int j = 0; j < notes.Count - 1; j++)
