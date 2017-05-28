@@ -117,11 +117,11 @@ namespace NoteGen
         {
             var gainer = new MFCCGainer(26, e.Result.Count, e.SampleRate);
             buffer.Add(gainer.getCoefficents(e.Result));
-            
-            if(buffer.Count == 15)
+            var notes = classifier.getNotes(e.Result);
+            if (buffer.Count == 15)
             {
                 var instruments = network.GetResults(buffer);
-                var notes = classifier.getNotes(e.Result);
+                
                 buffer.Clear();
             }
         }

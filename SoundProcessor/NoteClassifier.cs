@@ -16,7 +16,7 @@ namespace SoundProcessor
             var basicFreq = 16.352;
             for (int i = 0; i < 11; i++)
             {
-                for(int j = 0; j < 12; j++)
+                for(int j = 0; j < 11; j++)
                 {
                     notes.Add(new Note(noteNames[j] + i.ToString(), basicFreq));
                     basicFreq *= Math.Pow(2, 1.0 / 12);
@@ -41,7 +41,7 @@ namespace SoundProcessor
             var result = new List<SignalSample>();
             for(int i = 1; i < derivative.Count - 1; i++)
             {
-                if(derivative[i-1].Amplitude > 0 && derivative[i-1].Amplitude < 0)
+                if(derivative[i-1].Amplitude > 0 && derivative[i+1].Amplitude < 0)
                 {
                     result.Add(signal[i]);
                 }

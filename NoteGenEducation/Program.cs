@@ -141,20 +141,23 @@ namespace NoteGenEducation
             network.SaveWeights("weights");
         }
 
+        static NoteClassifier classifier = new NoteClassifier();
+
         static void audioGraph_FFTCalculated(object sender, SampleProcessor.FftEventArgs e)
         {
             var gainer = new MFCCGainer(26, e.Result.Count, e.SampleRate);
             buffer.Add(gainer.getCoefficents(e.Result));
-
+            var notes = classifier.getNotes(e.Result);
+            Console.WriteLine(String.Join(", ", notes.Distinct()));
             if (buffer.Count == 15)
             {
                 if (!isTest)
                 {
-                    Console.WriteLine("Current ErrorSum: {0}", network.errorSum);
+                    //Console.WriteLine("Current ErrorSum: {0}", network.errorSum);
                     var results = network.Teach(buffer, MarkedValues[currentInstrument]);
                     for (int i = 0; i < results.Count; i++)
                     {
-                        Console.WriteLine("{0} - {1:00.00}%", instruments[i], results[i] * 100);
+                        //Console.WriteLine("{0} - {1:00.00}%", instruments[i], results[i] * 100);
                     }
                 }
                 else
