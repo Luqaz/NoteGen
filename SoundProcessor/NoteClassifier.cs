@@ -65,6 +65,13 @@ namespace SoundProcessor
         public List<String> getNotes(List<SignalSample> signal)
         {
             var result = new List<String>();
+            foreach(var sample in signal)
+            {
+                if(Math.Abs(sample.Amplitude) < 0.0001)
+                {
+                    sample.Amplitude = 0;
+                }
+            }
             var maximums = getLocalMaximums(signal);
             for(int i = 0; i < maximums.Count; i++)
             {
