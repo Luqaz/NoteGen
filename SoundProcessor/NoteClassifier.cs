@@ -49,7 +49,7 @@ namespace SoundProcessor
             SignalSample temp;
             for(int i = 0; i < result.Count; i++)
             {
-                for(int j = 0; j < result.Count; j++)
+                for(int j = i; j < result.Count; j++)
                 {
                     if(result[j].Amplitude > result[i].Amplitude)
                     {
@@ -75,18 +75,21 @@ namespace SoundProcessor
             var maximums = getLocalMaximums(signal);
             for(int i = 0; i < maximums.Count; i++)
             {
-                var freq = maximums[i].Frequency;
-                for (int j = 0; j < notes.Count - 1; j++)
+                if (maximums[i].Amplitude > 0.0001)
                 {
-                    if(Math.Abs(freq - notes[j].Frequency) < (notes[j + 1].Frequency - notes[j].Frequency))
+                    var freq = maximums[i].Frequency;
+                    for (int j = 0; j < notes.Count - 1; j++)
                     {
-                        if(Math.Abs(freq - notes[j].Frequency) < Math.Abs(freq - notes[j + 1].Frequency))
+                        if (freq > notes[j].Frequency && freq < notes[j + 1].Frequency)
                         {
-                            result.Add(notes[j].Name);
-                        }
-                        else
-                        {
-                            result.Add(notes[j + 1].Name);
+                            if (Math.Abs(freq - notes[j].Frequency) < Math.Abs(freq - notes[j + 1].Frequency))
+                            {
+                                result.Add(notes[j].Name);
+                            }
+                            else
+                            {
+                                result.Add(notes[j + 1].Name);
+                            }
                         }
                     }
                 }

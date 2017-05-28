@@ -36,7 +36,7 @@ namespace NeuroNetwork
             {
                 foreach (var val in inputVals)
                 {
-                    Weights.Add(rand.NextDouble());
+                    Weights.Add(rand.NextDouble() - 0.5);
                     PreviousDeltas.Add(0);
                 }
             }

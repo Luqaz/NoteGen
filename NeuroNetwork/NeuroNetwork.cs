@@ -10,54 +10,63 @@ namespace NeuroNetwork
 {
     public class NeuroNetwork
     {
+        private List<Neuron> preInputLayer = new List<Neuron>();
         private List<Neuron> inputLayer = new List<Neuron>();
         private List<Neuron> hiddenLayer = new List<Neuron>();
         private List<Neuron> outputLayer = new List<Neuron>();
 
         private List<List<double>> inputs = new List<List<double>>();
+        private List<double> preInput2input = new List<double>();
         private List<double> input2hidden = new List<double>();
         private List<double> hidden2output = new List<double>();
 
         private const double eta = 0.1;
         private List<List<double>> inits = new List<List<double>>();
 
+        private const int bufferSize = 15;
+        private const int MFCCCount = 13;
+
         public double errorSum { get; private set; }
 
         public NeuroNetwork(int numOfOutputs)
         {
-            for(int i = 0; i < 15; i++)
+            for(int i = 0; i < bufferSize; i++)
             {
-                var input = new List<double>();
-                for(int j = 0; j < 25; j++)
+                var values = new List<double>();
+                for(int j = 0; j < MFCCCount; j++)
                 {
-                    input.Add(0);
+                    values.Add(0);
+                    preInputLayer.Add(new Neuron());
                 }
-                inputs.Add(input);
+                inputs.Add(values);
             }
-
-            for(int j = 0; j < inputs[0].Count; j++)
+            for(var i = 0; i < preInputLayer.Count; i++)
             {
-                var init = new List<double>();
-                for (int i = 0; i < inputs.Count; i++)
-                {
-                    init.Add(inputs[i][j]);
-                }
-                inits.Add(init);
+                preInput2input.Add(0);
+            }
+            preInput2input.Add(1);
+
+            var r = Math.Pow(preInput2input.Count / (double)numOfOutputs, 1.0 / 3);
+            var k1 = numOfOutputs * Math.Pow(r, 2);
+            var k2 = numOfOutputs * r;
+
+            for(var i = 0; i < k1 - 1; i++)
+            {
                 inputLayer.Add(new Neuron());
                 input2hidden.Add(0);
             }
+
             input2hidden.Add(1);
-
-            int k = (int)Math.Round(Math.Sqrt(inputLayer.Count * numOfOutputs));
-
-            for(int i = 0; i < k; i++)
+            
+            for(var i = 0; i < k2 - 1; i++)
             {
                 hiddenLayer.Add(new Neuron());
                 hidden2output.Add(0);
             }
+
             hidden2output.Add(1);
 
-            for (int i = 0; i < numOfOutputs; i++)
+            for(int i = 0; i < numOfOutputs; i++)
             {
                 outputLayer.Add(new Neuron());
             }
@@ -65,41 +74,46 @@ namespace NeuroNetwork
 
         public NeuroNetwork(int numOfOutputs, string FileName)
         {
-            for (int i = 0; i < 15; i++)
-            {
-                var input = new List<double>();
-                for (int j = 0; j < 25; j++)
-                {
-                    input.Add(0);
-                }
-                inputs.Add(input);
-            }
-
             var json = File.ReadAllText(FileName + ".json");
             var weights = new JavaScriptSerializer().Deserialize<List<List<double>>>(json);
 
-            for (int j = 0; j < inputs[0].Count; j++)
+            for (int i = 0; i < bufferSize; i++)
             {
-                var init = new List<double>();
-                for (int i = 0; i < inputs.Count; i++)
+                var values = new List<double>();
+                for (int j = 0; j < MFCCCount; j++)
                 {
-                    init.Add(inputs[i][j]);
+                    values.Add(0);
+                    preInputLayer.Add(new Neuron(weights[0]));
+                    weights.RemoveAt(0);
                 }
-                inputLayer.Add(new Neuron(weights[0]));
-                weights.RemoveAt(0);
-                inits.Add(init);
-                input2hidden.Add(0);
+                inputs.Add(values);
             }
+            for (var i = 0; i < preInputLayer.Count; i++)
+            {
+                preInput2input.Add(0);
+            }
+            preInput2input.Add(1);
+
+            var r = Math.Pow(preInput2input.Count / (double)numOfOutputs, 1.0 / 3);
+            var k1 = numOfOutputs * Math.Pow(r, 2);
+            var k2 = numOfOutputs * r;
+
+            for (var i = 0; i < k1 - 1; i++)
+            {
+                inputLayer.Add(new Neuron(weights[0]));
+                input2hidden.Add(0);
+                weights.RemoveAt(0);
+            }
+
             input2hidden.Add(1);
 
-            int k = (int)Math.Round(Math.Sqrt(inputLayer.Count * numOfOutputs));
-
-            for (int i = 0; i < k; i++)
+            for (var i = 0; i < k2 - 1; i++)
             {
                 hiddenLayer.Add(new Neuron(weights[0]));
-                weights.RemoveAt(0);
                 hidden2output.Add(0);
+                weights.RemoveAt(0);
             }
+
             hidden2output.Add(1);
 
             for (int i = 0; i < numOfOutputs; i++)
@@ -107,6 +121,7 @@ namespace NeuroNetwork
                 outputLayer.Add(new Neuron(weights[0]));
                 weights.RemoveAt(0);
             }
+
         }
 
         public List<double> GetResults(List<List<double>> source)
@@ -120,16 +135,20 @@ namespace NeuroNetwork
             }
 
             var result = new List<double>();
-            for(int i = 0; i < inputLayer.Count; i++)
+
+            for(var i = 0; i < inputs.Count; i++)
             {
-                var init = new List<double>();
-                for (int j = 0; j < inputs.Count; j++)
+                for(var j = 0; j < inputs[i].Count; j++)
                 {
-                    init.Add(inputs[j][i]);
+                    preInput2input[i * inputs[0].Count + j] = preInputLayer[i * inputs[0].Count + j].CountOutput(new List<double> { inputs[i][j] });
                 }
-                inits[i] = init;
-                input2hidden[i] = inputLayer[i].CountOutput(init);
             }
+
+            for(var i = 0; i < inputLayer.Count; i++)
+            {
+                input2hidden[i] = inputLayer[i].CountOutput(preInput2input);
+            }
+
             for (int i = 0; i < hiddenLayer.Count; i++)
             {
                 hidden2output[i] = hiddenLayer[i].CountOutput(input2hidden);
@@ -188,6 +207,7 @@ namespace NeuroNetwork
                 outputDeltas.Add(deltasForNeuron);
             }
 
+            var inputDEDSum = new List<double>();
             for (int i = 0; i < inputLayer.Count; i++)
             {
                 double dETotaldO = 0;
@@ -196,16 +216,31 @@ namespace NeuroNetwork
                     dETotaldO += hiddenDEDSum[j] * hiddenLayer[j].Weights[i];
                 }
                 var dOdSum = inputLayer[i].Derivative(input2hidden[i]);
+                inputDEDSum.Add(dETotaldO * dOdSum);
                 var deltasForNeuron = new List<double>();
-                for (int j = 0; j < inits[i].Count; j++)
+                for (int j = 0; j < preInput2input.Count; j++)
                 {
-                    var dEdW = dETotaldO * dOdSum * inits[i][j];
+                    var dEdW = dETotaldO * dOdSum * preInput2input[j];
                     deltasForNeuron.Add(-eta * dEdW);
                 }
                 outputDeltas.Add(deltasForNeuron);
             }
 
-            for(int i = 0; i< outputLayer.Count; i++)
+            for (int i = 0; i < preInputLayer.Count; i++)
+            {
+                double dETotaldO = 0;
+                for (var j = 0; j < inputLayer.Count; j++)
+                {
+                    dETotaldO += inputDEDSum[j] * inputLayer[j].Weights[i];
+                }
+                var dOdSum = preInputLayer[i].Derivative(preInput2input[i]);
+                var deltasForNeuron = new List<double>();
+                var dEdW = dETotaldO * dOdSum * inputs[i / inputs[0].Count][i % inputs[0].Count];
+                deltasForNeuron.Add(-eta * dEdW);
+                outputDeltas.Add(deltasForNeuron);
+            }
+
+            for (int i = 0; i< outputLayer.Count; i++)
             {
                 outputLayer[i].CorrectWeigts(outputDeltas[0]);
                 outputDeltas.RemoveAt(0);
@@ -220,6 +255,11 @@ namespace NeuroNetwork
                 inputLayer[i].CorrectWeigts(outputDeltas[0]);
                 outputDeltas.RemoveAt(0);
             }
+            for (int i = 0; i < preInputLayer.Count; i++)
+            {
+                preInputLayer[i].CorrectWeigts(outputDeltas[0]);
+                outputDeltas.RemoveAt(0);
+            }
 
             return outputs;
         }
@@ -227,6 +267,10 @@ namespace NeuroNetwork
         public void SaveWeights(String FileName)
         {
             var result = new List<List<double>>();
+            for (int i = 0; i < preInputLayer.Count; i++)
+            {
+                result.Add(preInputLayer[i].Weights);
+            }
             for (int i = 0; i < inputLayer.Count; i++)
             {
                 result.Add(inputLayer[i].Weights);

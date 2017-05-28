@@ -68,7 +68,7 @@ namespace SoundProcessor
 
             DCT(filteredPowers);
             filteredPowers.RemoveAt(0);
-            return filteredPowers.ToList();
+            return filteredPowers.Take(13).ToList();
         }
 
         private void DCT (List<double> source)
