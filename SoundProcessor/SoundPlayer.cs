@@ -1,31 +1,14 @@
-﻿//using CSCore;
-//using CSCore.Codecs;
-//using CSCore.SoundOut;
-using NAudio;
-using NAudio.Wave;
-using NAudio.Flac;
-using NAudio.Vorbis;
-using NAudio.WindowsMediaFormat;
+﻿using NAudio.Wave;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Windows;
+using System.Threading;
 
 namespace SoundProcessor
 {
     public class SoundPlayer
     {
         public WaveStream fileStream;
-        private IWavePlayer waveOutDevice;
-
-        public event EventHandler<SampleProcessor.MaxSampleEventArgs> VolumeCalculated;
-
-        protected virtual void OnMaximumCalculated(SampleProcessor.MaxSampleEventArgs e)
-        {
-            VolumeCalculated?.Invoke(this, e);
-        }
+        public IWavePlayer waveOutDevice;
 
         public event EventHandler<SampleProcessor.FftEventArgs> FftCalculated;
 
@@ -46,8 +29,8 @@ namespace SoundProcessor
 
         public void Load(string fileName)
         {
-            Stop();
             CloseFile();
+            Thread.Sleep(1000);
             EnsureDeviceCreated();
             OpenFile(fileName);
         }
@@ -60,7 +43,6 @@ namespace SoundProcessor
                 fileStream = audioFileReader;
                 var sampleProcessor = new SampleProcessor(audioFileReader);
                 sampleProcessor.NotificationCount = audioFileReader.WaveFormat.SampleRate / 100;
-                sampleProcessor.MaximumCalculated += (s, a) => OnMaximumCalculated(a);
                 sampleProcessor.FftCalculated += (s, a) => OnFftCalculated(a);
                 waveOutDevice.Init(sampleProcessor);
             }
@@ -86,10 +68,19 @@ namespace SoundProcessor
 
         private void CloseFile()
         {
+            if (waveOutDevice != null)
+            {
+                waveOutDevice.Stop();
+            }
             if (fileStream != null)
             {
                 fileStream.Dispose();
                 fileStream = null;
+            }
+            if (waveOutDevice != null)
+            {
+                waveOutDevice.Dispose();
+                waveOutDevice = null;
             }
         }
 
@@ -111,24 +102,6 @@ namespace SoundProcessor
             if (fileStream != null)
             {
                 fileStream.Position = 0;
-            }
-        }
-
-        public Stream getRawAudioDataStream()
-        {
-            Stream rawAudio = new MemoryStream();
-            fileStream.CopyTo(rawAudio);
-            return rawAudio;
-        }
-
-        public void Dispose()
-        {
-            Stop();
-            CloseFile();
-            if (waveOutDevice != null)
-            {
-                waveOutDevice.Dispose();
-                waveOutDevice = null;
             }
         }
     }

@@ -14,7 +14,6 @@ namespace NoteGenTest
         static SoundPlayer player;
 
         static Dictionary<String, List<Double>> MarkedValues = new Dictionary<string, List<double>>();
-        static String currentInstrument;
         static List<List<double>> buffer = new List<List<double>>();
         static NeuroNetwork.NeuroNetwork network;
 

@@ -1,24 +1,10 @@
-﻿using CSCore.Codecs;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using SoundProcessor;
-using NeuroNetwork;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.ComponentModel;
-using System.ComponentModel.Composition;
 
 namespace NoteGen
 {
@@ -40,37 +26,10 @@ namespace NoteGen
             InitializeComponent();
             network = new NeuroNetwork.NeuroNetwork(instruments.Count, "weights");
             player = new SoundPlayer();
-            player.VolumeCalculated += audioGraph_MaximumCalculated;
             player.FftCalculated += audioGraph_FFTCalculated;
 
             this.visualizations = new List<IVisualizationPlugin> { new PolylineWaveFormVisualization() };
             this.selectedVisualization = this.visualizations.FirstOrDefault();
-            presenter.Content = Visualization;
-        }
-
-        public IList<IVisualizationPlugin> Visualizations { get { return this.visualizations; } }
-
-        public object Visualization
-        {
-            get
-            {
-                return this.selectedVisualization.Content;
-            }
-        }
-
-        public IVisualizationPlugin SelectedVisualization
-        {
-            get
-            {
-                return this.selectedVisualization;
-            }
-            set
-            {
-                if (this.selectedVisualization != value)
-                {
-                    this.selectedVisualization = value;
-                }
-            }
         }
 
         private void FileOpenHandler(object sender, RoutedEventArgs e)
@@ -105,12 +64,6 @@ namespace NoteGen
         {
             base.OnClosing(e);
             player.Stop();
-        }
-
-        void audioGraph_MaximumCalculated(object sender, SampleProcessor.MaxSampleEventArgs e)
-        {
-            
-            this.SelectedVisualization.OnMaxCalculated(e.MinSample, e.MaxSample);
         }
         NoteClassifier classifier = new NoteClassifier();
         void audioGraph_FFTCalculated(object sender, SampleProcessor.FftEventArgs e)

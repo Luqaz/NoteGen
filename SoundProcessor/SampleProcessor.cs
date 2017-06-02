@@ -3,9 +3,6 @@ using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SoundProcessor
 {
@@ -13,20 +10,14 @@ namespace SoundProcessor
     {
         private ISampleProvider source;
         private int channels;
-        public event EventHandler<MaxSampleEventArgs> MaximumCalculated;
-        private float maxValue;
-        private float minValue;
         public int NotificationCount { get; set; }
 
         public event EventHandler<FftEventArgs> FftCalculated;
-        public bool PerformFFT { get; set; }
         private readonly Complex[] fftBuffer;
         private FftEventArgs fftArgs;
         private int fftPos;
         private readonly int fftLength;
         private int m;
-
-        int count;
 
         public SampleProcessor(ISampleProvider source, int fftLength = 1024)
         {
@@ -57,12 +48,6 @@ namespace SoundProcessor
             }
         }
 
-        public void Reset()
-        {
-            count = 0;
-            maxValue = minValue = 0;
-        }
-
         private void Add(float value)
         {
             fftBuffer[fftPos].X = (float)(value * FastFourierTransform.HammingWindow(fftPos, fftLength));
@@ -71,59 +56,34 @@ namespace SoundProcessor
             if (fftPos >= fftBuffer.Length)
             {
                 fftPos = 0;
-                // 1024 = 2^10
                 FastFourierTransform.FFT(true, m, fftBuffer);
                 fftArgs = new FftEventArgs(fftBuffer, NotificationCount*100);
                 FftCalculated(this, fftArgs);
-            }
-
-            maxValue = Math.Max(maxValue, value);
-            minValue = Math.Min(minValue, value);
-            count++;
-            if (count >= NotificationCount && NotificationCount > 0)
-            {
-                MaximumCalculated?.Invoke(this, new MaxSampleEventArgs(minValue, maxValue));
-                Reset();
             }
         }
 
         public int Read(float[] buffer, int offset, int count)
         {
-            var samplesRead = source.Read(buffer, offset, count);
-
+            int samplesRead;
+            try
+            {
+                samplesRead = source.Read(buffer, offset, count);
+            }
+            catch(Exception)
+            {
+                return 0;
+            }
             for (int n = 0; n < samplesRead; n += channels)
             {
 
                 Add(buffer[n + offset]);
             }
-
-            //for(double x = 0; x <= 1; x+=1.0/44100)
-            //{
-            //    Add((float)sin600hz(x));    
-            //}
             return samplesRead;
-        }
-
-        private double sin600hz(double x)
-        {
-            return Math.Sin(2 * Math.PI * 600 * x);
-        }
-
-        public class MaxSampleEventArgs : EventArgs
-        {
-            [DebuggerStepThrough]
-            public MaxSampleEventArgs(float minValue, float maxValue)
-            {
-                this.MaxSample = maxValue;
-                this.MinSample = minValue;
-            }
-            public float MaxSample { get; private set; }
-            public float MinSample { get; private set; }
         }
 
         public class FftEventArgs : EventArgs
         {
-            //[DebuggerStepThrough]
+            [DebuggerStepThrough]
             public FftEventArgs(Complex[] result, int sampleRate)
             {
                 this.Result = new List<SignalSample>();

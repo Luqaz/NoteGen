@@ -21,7 +21,6 @@ namespace NeuroNetwork
         private List<double> hidden2output = new List<double>();
 
         private const double eta = 0.1;
-        private List<List<double>> inits = new List<List<double>>();
 
         private const int bufferSize = 15;
         private const int MFCCCount = 13;

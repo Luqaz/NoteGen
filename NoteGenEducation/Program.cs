@@ -11,8 +11,6 @@ namespace NoteGenEducation
 {
     class Program
     {
-        static SoundPlayer player;
-
         static Dictionary<String, List<Double>> MarkedValues = new Dictionary<string, List<double>>();
         static String currentInstrument;
         static List<List<double>> buffer = new List<List<double>>();
@@ -27,7 +25,8 @@ namespace NoteGenEducation
         static void Main(string[] args)
         {
             var instrumentFolders = Directory.GetDirectories(Directory.GetCurrentDirectory() + "/../../Samples");
-            
+            var player = new SoundPlayer();
+            player.FftCalculated += audioGraph_FFTCalculated;
             Dictionary<String, List<String>> map = new Dictionary<string, List<string>>();
             foreach (var folder in instrumentFolders)
             {
@@ -54,12 +53,8 @@ namespace NoteGenEducation
 
             network = new NeuroNetwork.NeuroNetwork(MarkedValues.Count);
 
-            player = new SoundPlayer();
-            player.FftCalculated += audioGraph_FFTCalculated;
-
             var random = new Random();
             int generationNumber = 0;
-            int filesTrained = 0;
 
             for(int i = 0; i < instruments.Count; i++)
             {
@@ -68,7 +63,7 @@ namespace NoteGenEducation
             int count = 0;
             for(int i = 0; i < instruments.Count; i++)
             {
-                count += map[instruments[i]].Count;
+                count += map[instruments[i]].Count/2;
             }
             do
             {
@@ -79,22 +74,16 @@ namespace NoteGenEducation
                         var instrumentNumber = (int)Math.Round(random.NextDouble() * (instruments.Count - 1));
                         currentInstrument = instruments[instrumentNumber];
                         var fileNumber = (int)Math.Round(random.NextDouble() * (map[currentInstrument].Count - 1));
-
                         player.Load(map[currentInstrument][fileNumber]);
                         player.Play();
-                        if (currentInstrument == "Piano")
-                        {
-                            if (player.fileStream.TotalTime.Seconds > 4)
-                            {
-                                continue;
-                            }
-                        }
+
                         //Console.WriteLine("Playing {0}...", map[currentInstrument][j]);
                         while (player.Status == "Playing")
                         {
                         }
+                        
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         continue;
                     }
@@ -138,6 +127,9 @@ namespace NoteGenEducation
                 }
             }
             while (!isValid);
+            //GC.KeepAlive(player);
+            //GC.KeepAlive(player.fileStream);
+            //GC.KeepAlive(player.waveOutDevice);
             network.SaveWeights("weights");
         }
 
@@ -172,7 +164,7 @@ namespace NoteGenEducation
                         }
                     }
                 }
-                buffer.Clear();
+                buffer.RemoveAt(0);
             }
         }
     }
