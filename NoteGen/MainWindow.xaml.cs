@@ -18,13 +18,14 @@ namespace NoteGen
         private List<IVisualizationPlugin> visualizations;
         private IVisualizationPlugin selectedVisualization;
         private List<List<double>> buffer = new List<List<double>>();
-        private List<String> instruments = new List<string> { "Acoustic Guitar", "Electric Guitar", "Drums", "Violin", "Piano", "Flute" };
+        private List<String> instruments = new List<string> { "Acoustic Guitar", "Electric Guitar", "Drums", "Piano", "Violin", "Flute" };
         private NeuroNetwork.NeuroNetwork network; 
 
         public MainWindow()
         {
             InitializeComponent();
-            network = new NeuroNetwork.NeuroNetwork(instruments.Count, "weights");
+            network = new NeuroNetwork.NeuroNetwork(instruments.Count, "weights2");
+            network.SaveWeights("weights");
             player = new SoundPlayer();
             player.FftCalculated += audioGraph_FFTCalculated;
 
@@ -35,7 +36,7 @@ namespace NoteGen
         private void FileOpenHandler(object sender, RoutedEventArgs e)
         {
             var fileDialog = new OpenFileDialog();
-            fileDialog.Filter = "MP3 File (*.mp3)|*.mp3|FLAC file (*.flac)|*.flac|ALAC file (*.m4a)|*.m4a|OGG file (*.ogg)|*.ogg";
+            fileDialog.Filter = "MP3 File (*.mp3)|*.mp3|FLAC file (*.flac)|*.flac|ALAC file (*.m4a)|*.m4a|OGG file (*.ogg)|*.ogg|WAV file (*.wav)|*.wav";
             if(fileDialog.ShowDialog().Value)
             {
                 fileName = fileDialog.FileName;
@@ -70,12 +71,18 @@ namespace NoteGen
         {
             var gainer = new MFCCGainer(26, e.Result.Count, e.SampleRate);
             buffer.Add(gainer.getCoefficents(e.Result));
-            var notes = classifier.getNotes(e.Result);
             if (buffer.Count == 15)
             {
-                var instruments = network.GetResults(buffer);
-                
-                buffer.Clear();
+                var notes = classifier.getNotes(e.Result);
+                var instrumentsValues = network.GetResults(buffer);
+                notesLabel.Content = String.Join("\n", notes);
+                String instrs = "";
+                for(int i = 0; i < instrumentsValues.Count; i++)
+                {
+                        instrs += String.Format("{0} - {1}\n", instruments[i], instrumentsValues[i]);
+                }
+                instrumentsLabel.Content = instrs;
+                buffer.RemoveAt(0);
             }
         }
     }
